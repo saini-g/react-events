@@ -5,13 +5,14 @@
     right: 0;
     height: 3rem;
     padding: 0 4rem;
-    background-color: lightblue;
+    background-color: #FFC857;
     display: flex;
     align-items: center;
     justify-content: space-between;
 }
 .nav-logo h3 {
     margin: 0;
+    color: #2F323A;
 }
 .navbar ul {
     display: flex;
@@ -20,12 +21,13 @@
     padding: 0;
 }
 .navbar li {
-    margin: 0 0.5rem;
+    padding: 0 1rem;
 }
 .navbar a {
     text-decoration: none;
-    color: dimgray;
+    color: #444444;
+    font-weight: 600;
 }
 .navbar a.active {
-    color: black;
+    color: #221E22;
 }
