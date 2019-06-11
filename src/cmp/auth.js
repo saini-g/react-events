@@ -4,6 +4,10 @@ import './auth.css';
 
 class AuthCmp extends Component {
 
+    state = {
+        isLogin: true
+    };
+
     constructor(props) {
         super(props);
         this.emailElm = React.createRef();
@@ -18,19 +22,30 @@ class AuthCmp extends Component {
         if (email.trim().length === 0 || password.trim().length === 0) {
             return;
         }
-        const reqBody = {
+        let reqBody = {
             query: `
-                mutation {
-                    createUser(userInput: {
-                        email: "${email}",
-                        password: "${password}"
-                    }) {
-                        _id
-                        email
+                query {
+                    login(email: "${email}", password: "${password}") {
+                        userId
+                        token
+                        expiresIn
                     }
                 }
             `
         };
+
+        if (!this.state.isLogin) {
+            reqBody = {
+                query: `
+                    mutation {
+                        createUser(userInput: { email: "${email}", password: "${password}" }) {
+                            _id
+                            email
+                        }
+                    }
+                `
+            };
+        }
 
         fetch('http://localhost:8000/graphql', {
             method: 'POST',
@@ -52,6 +67,12 @@ class AuthCmp extends Component {
         .catch(err => console.log(err));
     }
 
+    toggleLogin = () => {
+        this.setState(prevState => {
+            return { isLogin: !prevState.isLogin };
+        });
+    }
+
     render() {
         return <form onSubmit={this.submitHandler}>
             <div className="form-element">
@@ -63,8 +84,8 @@ class AuthCmp extends Component {
                 <input type="password" id="password" ref={this.passwordElm} />
             </div>
             <div className="form-footer">
-                <button type="button">Login</button>
-                <button type="submit">Signup</button>
+                <button type="button" onClick={this.toggleLogin}>Switch to {this.state.isLogin ? 'Signup' : 'Login'}</button>
+                <button type="submit">Submit</button>
             </div>
         </form>
     }
