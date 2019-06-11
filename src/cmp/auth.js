@@ -2,11 +2,15 @@ import React, { Component } from 'react';
 
 import './auth.css';
 
+import AuthContext from '../context/auth-context';
+
 class AuthCmp extends Component {
 
     state = {
         isLogin: true
     };
+
+    static contextType = AuthContext
 
     constructor(props) {
         super(props);
@@ -63,6 +67,10 @@ class AuthCmp extends Component {
         })
         .then(data => {
             console.log(data);
+            
+            if (this.state.isLogin && data.data.login.token) {
+                this.context.login(data.data.login.token, data.data.login.userId, data.data.login.expiresIn);
+            }
         })
         .catch(err => console.log(err));
     }
