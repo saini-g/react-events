@@ -1,0 +1,10 @@
+.btn-container {
+    text-align: center;
+    width: 50%;
+    border-bottom: 1px solid lightgrey;
+    padding: 1rem 0;
+    margin: 0 auto;
+}
+.btn-container p {
+    padding-bottom: 1rem;
+}

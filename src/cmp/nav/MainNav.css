@@ -23,11 +23,19 @@
 .navbar li {
     padding: 0 1rem;
 }
-.navbar a {
+.navbar a, .navbar button {
     text-decoration: none;
     color: #444444;
     font-weight: 600;
 }
 .navbar a.active {
     color: #221E22;
+}
+.navbar button {
+    border: none;
+    outline: none;
+    background: none;
+    font-size: 1em;
+    padding: 0;
+    cursor: pointer;
 }
