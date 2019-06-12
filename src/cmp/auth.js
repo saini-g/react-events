@@ -10,7 +10,7 @@ class AuthCmp extends Component {
         isLogin: true
     };
 
-    static contextType = AuthContext
+    static contextType = AuthContext;
 
     constructor(props) {
         super(props);
@@ -92,8 +92,8 @@ class AuthCmp extends Component {
                 <input type="password" id="password" ref={this.passwordElm} />
             </div>
             <div className="form-footer">
-                <button type="button" onClick={this.toggleLogin}>Switch to {this.state.isLogin ? 'Signup' : 'Login'}</button>
-                <button type="submit">Submit</button>
+                <button className="btn" type="button" onClick={this.toggleLogin}>Switch to {this.state.isLogin ? 'Signup' : 'Login'}</button>
+                <button className="btn btn-primary" type="submit">Submit</button>
             </div>
         </form>
     }
