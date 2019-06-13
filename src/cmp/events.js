@@ -7,7 +7,10 @@ import './events.css'
 
 class EventsCmp extends Component {
 
-    state = { showEventModal: false };
+    state = {
+        showEventModal: false,
+        events: []
+    };
 
     static contextType = AuthContext;
 
@@ -17,6 +20,48 @@ class EventsCmp extends Component {
         this.priceElm = React.createRef();
         this.dateElm = React.createRef();
         this.descElm = React.createRef();
+    }
+
+    componentDidMount() {
+        this.fetchEvents();
+    }
+
+    fetchEvents = () => {
+        const reqBody = {
+            query: `
+                query {
+                    events {
+                        _id
+                        title
+                        price
+                        description
+                        created_by {
+                            _id
+                            email
+                        }
+                    }
+                }
+            `
+        };
+
+        fetch('http://localhost:8000/graphql', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(reqBody)
+        })
+        .then(res => {
+
+            if (res.status !== 200 && res.status !== 201) {
+                throw new Error('get events failed!');
+            }
+            return res.json();
+        })
+        .then(data => {
+            this.setState({ events: data.data.events });
+        })
+        .catch(err => console.log(err));
     }
 
     createEvent = () => {
@@ -74,12 +119,16 @@ class EventsCmp extends Component {
             return res.json();
         })
         .then(data => {
-            console.log(data);
+            this.fetchEvents();
         })
         .catch(err => console.log(err));
     }
 
     render() {
+        const eventsList = this.state.events.map(ev => {
+            return <li key={ev._id} className="events-list-item">{ev.title}</li>;
+        });
+        
         return (
             <React.Fragment>
                 {
@@ -112,6 +161,9 @@ class EventsCmp extends Component {
                         <button className="btn" onClick={this.createEvent}>Create Event</button>
                     </div>
                 }
+                <ul className="events-list">
+                    {eventsList}
+                </ul>
             </React.Fragment>
         )
     }
