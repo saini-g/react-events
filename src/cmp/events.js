@@ -2,14 +2,17 @@ import React, { Component } from 'react';
 
 import Modal from './modal/Modal';
 import AuthContext from '../context/auth-context';
+import CardsContainer from '../cmp/events/CardsContainer';
+import Spinner from '../cmp/Spinner/Spinner';
 
-import './events.css'
+import './events.css';
 
 class EventsCmp extends Component {
 
     state = {
         showEventModal: false,
-        events: []
+        events: [],
+        isLoading: false
     };
 
     static contextType = AuthContext;
@@ -27,6 +30,7 @@ class EventsCmp extends Component {
     }
 
     fetchEvents = () => {
+        this.setState({ isLoading: true });
         const reqBody = {
             query: `
                 query {
@@ -35,6 +39,7 @@ class EventsCmp extends Component {
                         title
                         price
                         description
+                        date
                         created_by {
                             _id
                             email
@@ -60,8 +65,12 @@ class EventsCmp extends Component {
         })
         .then(data => {
             this.setState({ events: data.data.events });
+            this.setState({ isLoading: false });
         })
-        .catch(err => console.log(err));
+        .catch(err => {
+            console.log(err);
+            this.setState({ isLoading: false });
+        });
     }
 
     createEvent = () => {
@@ -94,10 +103,7 @@ class EventsCmp extends Component {
                         title
                         price
                         description
-                        created_by {
-                            _id
-                            email
-                        }
+                        date
                     }
                 }
             `
@@ -119,16 +125,25 @@ class EventsCmp extends Component {
             return res.json();
         })
         .then(data => {
-            this.fetchEvents();
+            this.setState(prevState => {
+                const updatedEvents = [...prevState.events];
+                updatedEvents.push({
+                    _id: data.data.createEvent._id,
+                    title: data.data.createEvent.title,
+                    price: data.data.createEvent.price,
+                    description: data.data.createEvent.description,
+                    date: data.data.createEvent.date,
+                    created_by: {
+                        _id: this.context.userId
+                    }
+                });
+                return { events: updatedEvents };
+            });
         })
         .catch(err => console.log(err));
     }
 
     render() {
-        const eventsList = this.state.events.map(ev => {
-            return <li key={ev._id} className="events-list-item">{ev.title}</li>;
-        });
-        
         return (
             <React.Fragment>
                 {
@@ -161,9 +176,11 @@ class EventsCmp extends Component {
                         <button className="btn" onClick={this.createEvent}>Create Event</button>
                     </div>
                 }
-                <ul className="events-list">
-                    {eventsList}
-                </ul>
+                {
+                    this.state.isLoading
+                    ? <Spinner />
+                    : <CardsContainer userId={this.context.userId} events={this.state.events} />
+                }
             </React.Fragment>
         )
     }
