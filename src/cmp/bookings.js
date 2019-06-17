@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 
 import AuthContext from '../context/auth-context';
 import Spinner from '../cmp/Spinner/Spinner';
+import BookingList from '../cmp/bookings/BookingList';
 
 import './bookings.css';
 
@@ -30,6 +31,9 @@ class BookingsCmp extends Component {
                             title
                             date
                         }
+                        user {
+                            _id
+                        }
                     }
                 }
             `
@@ -51,7 +55,11 @@ class BookingsCmp extends Component {
             return res.json();
         })
         .then(data => {
-            this.setState({ bookings: data.data.bookings });
+            debugger;
+            const currentUserBookings
+                = data.data.bookings.filter(booking => booking.user._id === this.context.userId);
+
+            this.setState({ bookings: currentUserBookings });
             this.setState({ isLoading: false });
         })
         .catch(err => {
@@ -60,19 +68,17 @@ class BookingsCmp extends Component {
         });
     }
 
+    cancelBookingHandler = bookingId => {
+        console.log('cancel booking clicked', bookingId);
+    }
+
     render() {
         return (
             <React.Fragment>
                 {
                     this.state.isLoading
                     ? <Spinner />
-                    : <ul>
-                        {this.state.bookings.map(booking => {
-                            return <li key={booking._id}>
-                                {booking.event.title} - {booking.event.date}
-                            </li>;
-                        })}
-                    </ul>
+                    : <BookingList bookings={this.state.bookings} cancelHandler={this.cancelBookingHandler} />
                 }
             </React.Fragment>
         )

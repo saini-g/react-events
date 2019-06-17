@@ -66,8 +66,7 @@ class AuthCmp extends Component {
             return res.json();
         })
         .then(data => {
-            console.log(data);
-            
+
             if (this.state.isLogin && data.data.login.token) {
                 this.context.login(data.data.login.token, data.data.login.userId, data.data.login.expiresIn);
             }

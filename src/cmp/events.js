@@ -188,7 +188,6 @@ class EventsCmp extends Component {
             return res.json();
         })
         .then(data => {
-            console.log(data);
             this.cancelEvent();
         })
         .catch(err => console.log(err));
