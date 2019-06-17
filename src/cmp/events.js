@@ -12,8 +12,11 @@ class EventsCmp extends Component {
     state = {
         showEventModal: false,
         events: [],
-        isLoading: false
+        isLoading: false,
+        selectedEvent: null
     };
+
+    isCmpMounted = true;
 
     static contextType = AuthContext;
 
@@ -64,12 +67,18 @@ class EventsCmp extends Component {
             return res.json();
         })
         .then(data => {
-            this.setState({ events: data.data.events });
-            this.setState({ isLoading: false });
+
+            if (this.isCmpMounted) {
+                this.setState({ events: data.data.events });
+                this.setState({ isLoading: false });
+            }
         })
         .catch(err => {
-            console.log(err);
-            this.setState({ isLoading: false });
+
+            if (this.isCmpMounted) {
+                console.log(err);
+                this.setState({ isLoading: false });
+            }
         });
     }
 
@@ -78,7 +87,7 @@ class EventsCmp extends Component {
     }
 
     cancelEvent = () => {
-        this.setState({ showEventModal: false });
+        this.setState({ showEventModal: false, selectedEvent: null });
     }
 
     saveEvent = () => {
@@ -143,12 +152,63 @@ class EventsCmp extends Component {
         .catch(err => console.log(err));
     }
 
+    showEventDetails = eventId => {
+        this.setState(prevState => {
+            const selectedEv = prevState.events.find(ev => ev._id === eventId);
+            return { selectedEvent: selectedEv };
+        });
+    }
+
+    bookEvent = () => {
+        const reqBody = {
+            query: `
+                mutation {
+                    bookEvent(eventId: "${this.state.selectedEvent._id}") {
+                        _id
+                        createdAt
+                        updatedAt
+                    }
+                }
+            `
+        };
+
+        fetch('http://localhost:8000/graphql', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${this.context.token}`
+            },
+            body: JSON.stringify(reqBody)
+        })
+        .then(res => {
+
+            if (res.status !== 200 && res.status !== 201) {
+                throw new Error('event creation failed!');
+            }
+            return res.json();
+        })
+        .then(data => {
+            console.log(data);
+            this.cancelEvent();
+        })
+        .catch(err => console.log(err));
+    }
+
+    componentWillUnmount() {
+        this.isCmpMounted = false;
+    }
+
     render() {
         return (
             <React.Fragment>
                 {
                     this.state.showEventModal &&
-                    <Modal title="Add Event" isCancel isSave onCancel={this.cancelEvent} onSave={this.saveEvent}>
+                    <Modal title="Add Event"
+                            isCancel isSave
+                            onCancel={this.cancelEvent}
+                            onSave={this.saveEvent}
+                            cancelLabel="Cancel"
+                            submitLabel="Save">
                         <form>
                             <div className="form-element">
                                 <label htmlFor="title">Title</label>
@@ -172,14 +232,27 @@ class EventsCmp extends Component {
                 {
                     this.context.token &&
                     <div className="btn-container">
-                        <p>Create your own event!</p>
+                        <p>Publish a new event!</p>
                         <button className="btn" onClick={this.createEvent}>Create Event</button>
                     </div>
                 }
                 {
+                    this.state.selectedEvent &&
+                    <Modal title={this.state.selectedEvent.title}
+                            isCancel isSave
+                            onCancel={this.cancelEvent}
+                            onSave={this.bookEvent}
+                            cancelLabel="Close"
+                            submitLabel="Book Event">
+                        <h1>{this.state.selectedEvent.title}</h1>
+                        <p>{this.state.selectedEvent.description}</p>
+                    </Modal>
+                }
+                {
                     this.state.isLoading
                     ? <Spinner />
-                    : <CardsContainer userId={this.context.userId} events={this.state.events} />
+                    : <CardsContainer showDetails={this.showEventDetails}
+                            userId={this.context.userId} events={this.state.events} />
                 }
             </React.Fragment>
         )

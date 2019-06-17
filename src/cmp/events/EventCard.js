@@ -9,7 +9,9 @@ const itemCard = props => (
         {
             props.userId === props.event.created_by._id ?
             '' : <div className="card-footer">
-                <button className="btn btn-primary">Book Event</button>
+                <button onClick={props.viewDetails.bind(this, props.event._id)} className="btn btn-primary">
+                    View Details
+                </button>
             </div>
         }
     </div>
