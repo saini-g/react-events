@@ -2,6 +2,7 @@
     border: 1px solid #efefef;
     border-radius: 3px;
     padding: 0.5rem 2rem;
+    margin-top: 0.75rem;
     display: flex;
     align-items: center;
     justify-content: space-between;

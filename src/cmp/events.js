@@ -238,7 +238,7 @@ class EventsCmp extends Component {
                 {
                     this.state.selectedEvent &&
                     <Modal title={this.state.selectedEvent.title}
-                            isCancel isSave
+                            isCancel isSave={this.context.token !== null}
                             onCancel={this.cancelEvent}
                             onSave={this.bookEvent}
                             cancelLabel="Close"

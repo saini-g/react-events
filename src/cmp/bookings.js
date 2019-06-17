@@ -55,7 +55,6 @@ class BookingsCmp extends Component {
             return res.json();
         })
         .then(data => {
-            debugger;
             const currentUserBookings
                 = data.data.bookings.filter(booking => booking.user._id === this.context.userId);
 
@@ -69,7 +68,38 @@ class BookingsCmp extends Component {
     }
 
     cancelBookingHandler = bookingId => {
-        console.log('cancel booking clicked', bookingId);
+        const reqBody = {
+            query: `
+                mutation {
+                    cancelBooking(bookingId: "${bookingId}")
+                }
+            `
+        };
+
+        fetch('http://localhost:8000/graphql', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${this.context.token}`
+            },
+            body: JSON.stringify(reqBody)
+        })
+        .then(res => {
+
+            if (res.status !== 200 && res.status !== 201) {
+                throw new Error('cancel booking failed!');
+            }
+            return res.json();
+        })
+        .then(data => {
+            console.log(data);
+
+            this.setState(prevState => {
+                const updatedBookings = prevState.bookings.filter(booking => booking._id !== bookingId);
+                return { bookings: updatedBookings };
+            });
+        })
+        .catch(err => console.log(err));
     }
 
     render() {
